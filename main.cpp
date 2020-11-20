@@ -251,7 +251,9 @@ int main() {
     cout << "The final marketing budget allocation is:\n";
     result.printData(cout);
 
-    if(outputFile->is_open()) outputFile->close();
+    if(outputFile->is_open())
+        outputFile->close();
+
     return 0;
 
 }
