@@ -181,7 +181,7 @@ public:
     }
 
     Chromosome execute(int epochs, ostream *loggerStream = nullptr) {
-        if(loggerStream)
+        if (loggerStream)
             (*loggerStream) << "\nSTART OF THE EXECUTION\n------------------------------------------\n";
 
         for (int currState = 1; currState <= epochs; ++currState) {
@@ -191,7 +191,7 @@ public:
             nextGeneration();
         }
 
-        if(loggerStream)
+        if (loggerStream)
             (*loggerStream) << "\nEND OF THE EXECUTION\n------------------------------------------\n";
 
         return bestChromosome;
