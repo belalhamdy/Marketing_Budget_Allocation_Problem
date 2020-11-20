@@ -187,6 +187,7 @@ public:
         for (int currState = 1; currState <= epochs; ++currState) {
             if (loggerStream)
                 logState(currState, *loggerStream);
+
             nextGeneration();
         }
 
