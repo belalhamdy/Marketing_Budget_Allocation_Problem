@@ -234,7 +234,6 @@ int main() {
             channelUB = 100;
         }
 
-
         lowerBounds[i] = channelLB;
         upperBounds[i] = channelUB;
     }
@@ -251,7 +250,7 @@ int main() {
     cout << "The final marketing budget allocation is:\n";
     result.printData(cout);
 
-    if(outputFile->is_open())
+    if (outputFile->is_open())
         outputFile->close();
 
     return 0;
