@@ -186,7 +186,10 @@ public:
                 logState(currState, *loggerStream);
             nextGeneration();
         }
-        (*loggerStream) << "\nEND OF THE EXECUTION\n------------------------------------------\n";
+
+        if(loggerStream)
+            (*loggerStream) << "\nEND OF THE EXECUTION\n------------------------------------------\n";
+
         return bestChromosome;
     }
 
