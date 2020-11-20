@@ -200,7 +200,6 @@ int main() {
     string outputFilename = "logger.out";
     auto *outputFile = new ofstream(); // to redirect it to cout -> `auto* outputFile = &cout`
     outputFile->open(outputFilename, ios::app); // If you want to clear the output every run make it ios::out
-    // TODO: send the ostream to the function that runs the algorithm to log the outputs to this file and don't forget to close the file
 
     cout << "Enter the marketing budget (in thousands \"K\"):\n";
     cin >> marketingBudget;
@@ -251,7 +250,7 @@ int main() {
     cout << "The final marketing budget allocation is:\n";
     result.printData(cout);
 
-
+    if(outputFile->is_open()) outputFile->close();
     return 0;
 
 }
