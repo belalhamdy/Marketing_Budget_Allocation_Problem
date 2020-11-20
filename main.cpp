@@ -51,12 +51,16 @@ private:
     bool isFitnessUptoDate = false;
 
     void uniformMutate() {
-        // TODO: implement uniform mutation
+        /* TODO: implement uniform mutation
+            * I need no invalid solutions here make sure you are generating a valid solution
+         */
         // dont update fitness
     }
 
     void nonuniformMutate() {
-        // TODO: implement non-uniform mutation
+        /* TODO: implement non-uniform mutation
+            * I need no invalid solutions here make sure you are generating a valid solution
+        */
         // dont update fitness here
     }
 
@@ -141,7 +145,7 @@ private:
         vector<double> chromosomesFitness = getChromosomesFitness();
         int firstParentIdx = 0, secondParentIdx = data->getNChannels() - 1;
         /* TODO: implement tournament selection and fill (firstParentIdx and secondParentIdx),
-         * After implementing remove firstParentIdx and secondParentIdx initialization
+            * After implementing remove firstParentIdx and secondParentIdx initialization
          */
 
 
