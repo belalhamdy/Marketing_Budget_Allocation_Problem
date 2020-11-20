@@ -181,6 +181,9 @@ public:
     }
 
     Chromosome execute(int epochs, ostream *loggerStream = nullptr) {
+        if(loggerStream)
+            (*loggerStream) << "\nSTART OF THE EXECUTION\n------------------------------------------\n";
+
         for (int currState = 1; currState <= epochs; ++currState) {
             if (loggerStream)
                 logState(currState, *loggerStream);
