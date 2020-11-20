@@ -62,7 +62,7 @@ private:
 
     // fitness is the total profit
     void setFitness() {
-        // TODO: set fitness here
+        // TODO: calculate and set fitness here
         isFitnessUptoDate = true;
     }
 
