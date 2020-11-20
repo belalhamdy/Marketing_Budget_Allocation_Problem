@@ -82,6 +82,7 @@ public:
     double getData(int idx) { return chromosomeData[idx]; }
 
     void mutate() {
+        // randomly selects between the two types
         std::uniform_real_distribution<> dist(0, 1);
         int selection = (int) round(dist(g_RNG));
 
