@@ -43,7 +43,7 @@ public:
         return (lowerBounds[idx] <= val && upperBounds[idx] >= val);
     }
     //Forces val to be in bounds of the idx-th constraint.
-    double clipToBounds(int idx, double val) {
+    double clipToBounds(int idx, double val) const {
         if (val < lowerBounds[idx]) val = lowerBounds[idx];
         if (val > upperBounds[idx]) val = upperBounds[idx];
         return val;
@@ -62,19 +62,6 @@ private:
     double fitness = DBL_MIN;
     bool isFitnessUptoDate = false;
 
-    void uniformMutate() {
-        /* TODO: implement uniform mutation
-            * I need no invalid solutions here make sure you are generating a valid solution
-         */
-        // dont update fitness
-    }
-
-    void nonuniformMutate() {
-        /* TODO: implement non-uniform mutation
-            * I need no invalid solutions here make sure you are generating a valid solution
-        */
-        // dont update fitness here
-    }
     double getChannelReturn(int idx) {
         double investment = this->getData(idx) / 100 * algorithmsData->getMarketingBudget();
         return (investment * algorithmsData->getChannelROI(idx));
@@ -116,6 +103,7 @@ private:
                         break;
                 }
             }
+            isFitnessUptoDate = false;
         }
     }
 
@@ -136,15 +124,16 @@ public:
 
     double getData(int idx) { return chromosomeData[idx]; }
 
-    void mutate() {
-        // randomly selects between the two types
-        std::uniform_real_distribution<> dist(0, 1);
-        int selection = (int) round(dist(g_RNG));
+    void mutate(double probability) {
+        std::uniform_real_distribution<double> doMutation(0, 1);
+        if (doMutation(g_RNG) < probability) return;
 
-        if (selection) uniformMutate();
-        else nonuniformMutate();
+        std::uniform_int_distribution<int> mutationIdx(0, chromosomeData.size());
+        int i = mutationIdx(g_RNG);
 
-        isFitnessUptoDate = false;
+        chromosomeData[i] = algorithmsData->generateInvestment(i);
+
+        makeChromosomeFeasible();
     }
 
     pair<Chromosome, Chromosome> combineWith(const Chromosome &other) const {
@@ -193,6 +182,8 @@ private:
     dataHandler *data;
     Chromosome bestChromosome;
     vector<Chromosome> population;
+    double mutationProbability;
+    bool uniformMutation;
 
     /// gets the population fitness
     vector<double> getChromosomesFitness() {
@@ -210,7 +201,7 @@ private:
             bestChromosome = newData;
     }
 
-    void nextGeneration() {
+    void nextGeneration(int generationIdx) {
         vector<double> chromosomesFitness = getChromosomesFitness();
 
         std::uniform_int_distribution<int> uid(0, data->getNChannels() - 1);
@@ -223,8 +214,14 @@ private:
         Chromosome firstParent = population[firstParentIdx], secondParent = population[secondParentIdx];
         pair<Chromosome, Chromosome> offSprings = firstParent.combineWith(secondParent);
 
-        offSprings.first.mutate();
-        offSprings.second.mutate();
+        double probability;
+        if (uniformMutation)
+            probability = mutationProbability;
+        else
+            probability = mutationProbability / generationIdx;
+
+        offSprings.first.mutate(probability);
+        offSprings.second.mutate(probability);
 
         replaceOffspring(firstParentIdx, offSprings.first);
         replaceOffspring(secondParentIdx, offSprings.second);
@@ -245,7 +242,8 @@ private:
     }
 
 public:
-    GeneticAlgorithm(dataHandler *data, int populationSize) {
+    GeneticAlgorithm(dataHandler *data, int populationSize, double mutationProbability = 0.1,
+                     bool uniformMutation = true) {
         this->data = data;
         population.resize(populationSize);
 
@@ -258,6 +256,8 @@ public:
             if (population[i].getFitness() > bestChromosome.getFitness())
                 bestChromosome = population[i];
         }
+        this->mutationProbability = mutationProbability;
+        this->uniformMutation = uniformMutation;
     }
 
     Chromosome execute(int epochs, ostream *loggerStream = nullptr) {
@@ -270,7 +270,7 @@ public:
             if (loggerStream)
                 logState(currState, *loggerStream);
 
-            nextGeneration();
+            nextGeneration(currState);
         }
 
         if (loggerStream)
@@ -300,7 +300,7 @@ int main() {
     vector<double> lowerBounds(nChannels), upperBounds(nChannels), channelROIs(nChannels);
     vector<string> channelNames(nChannels);
 
-    cout << "Enter the name and ROI (in %) of each channel separated by space:\n";
+    cout << "Enter the name (without any spaces) and ROI (in %) of each channel separated by space:\n";
     for (int i = 0; i < nChannels; ++i) {
         cin >> channelName >> channelROI;
 
@@ -348,13 +348,14 @@ int main() {
 /* Input:
 100
 4
-8
-12
-7
-11
+TV_Advertisement 8
+Google 12
+Twitter 7
+Facebook 11
 2.7 58
 20.5 x
 x 18
 10 x
- */
+
+*/
 
