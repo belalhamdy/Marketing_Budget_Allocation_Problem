@@ -43,6 +43,10 @@ public:
 
 };
 
+/*
+ * Chromosome carries the investment percentage for each channel
+ * When calculating fitness and representing data we multiply the investment by the marketing budget
+ */
 class Chromosome {
 private:
     dataHandler *algorithmsData = nullptr;
@@ -66,7 +70,11 @@ private:
 
     // fitness is the total profit
     void setFitness() {
-        // TODO: calculate and set fitness here
+        double totalFitness = 0;
+        for (int i = 0; i < chromosomeData.size(); ++i)
+            totalFitness += getChannelReturn(i);
+
+        fitness = totalFitness;
         isFitnessUptoDate = true;
     }
 
@@ -111,9 +119,14 @@ public:
         return fitness;
     }
 
+    double getChannelReturn(int idx) {
+        return this->getData(idx) / 100 * algorithmsData->getMarketingBudget();
+    }
+
     void printData(ostream &out) {
-        for (int i = 0; i < chromosomeData.size(); ++i)
-            out << algorithmsData->getChannelName(i) << " -> " << this->getData(i) << "K\n";
+        for (int i = 0; i < chromosomeData.size(); ++i) {
+            out << algorithmsData->getChannelName(i) << " -> " << getChannelReturn(i) << "K\n";
+        }
         out << "\nThe total profit is " << this->getFitness() << "K\n";
     }
 
@@ -161,11 +174,16 @@ private:
     }
 
     void logState(int stateID, ostream &loggerStream) {
-        /* To become more fancy add this line of code
-         * if(stateID == 1) loggerStream << "Initial State\n";
-         * else loggerStream << stateID << "\n";
-         */
-        // TODO: log the current state to the stream
+        if (stateID == 1) loggerStream << "Initial State(" << stateID << ")\n";
+        else loggerStream << stateID << "\n";
+
+        loggerStream << "Population:\n";
+        for (auto& curr : population) {
+            curr.printData(loggerStream);
+        }
+        loggerStream << "\nBest Chromosome:\n";
+        bestChromosome.printData(loggerStream);
+        loggerStream << "\n";
     }
 
 public:
@@ -186,7 +204,9 @@ public:
 
     Chromosome execute(int epochs, ostream *loggerStream = nullptr) {
         if (loggerStream)
-            (*loggerStream) << "\nSTART OF THE EXECUTION\n------------------------------------------\n";
+            (*loggerStream) << "\nSTART OF THE EXECUTION\n------------------------------------------\n"
+            << "Number of Epochs = " << epochs << "\n"
+            << "Population Size = " << population.size();
 
         for (int currState = 1; currState <= epochs; ++currState) {
             if (loggerStream)
