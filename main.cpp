@@ -34,9 +34,8 @@ public:
     string getChannelName(int idx) const { return channelNames[idx]; }
 
     /// generates a random investment for a specific channel (0 - base) based on the channel lower and upper bounds
-    double generateInvestment(int channelIdx) {
-        // nextafter -> gets the value after upperBounds[channelIdx] to make the UB inclusive
-        uniform_real_distribution<double> dist(lowerBounds[channelIdx], nextafter(upperBounds[channelIdx], DBL_MAX));
+    double generateInvestment(int channelIdx) const {
+        uniform_real_distribution<double> dist(lowerBounds[channelIdx], upperBounds[channelIdx]);
         return dist(g_RNG);
     }
     bool isInBounds(int idx, double val) const {
@@ -48,7 +47,6 @@ public:
         if (val > upperBounds[idx]) val = upperBounds[idx];
         return val;
     }
-
 };
 
 /*
