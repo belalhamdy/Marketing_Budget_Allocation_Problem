@@ -39,6 +39,9 @@ public:
         uniform_real_distribution<double> dist(lowerBounds[channelIdx], nextafter(upperBounds[channelIdx], DBL_MAX));
         return dist(g_RNG);
     }
+    bool isInBounds(int idx, double val) const{
+        return (lowerBounds[idx] <= val && upperBounds[idx] >= val);
+    }
 
 
 };
@@ -67,7 +70,10 @@ private:
         */
         // dont update fitness here
     }
-
+    double getChannelReturn(int idx) {
+        double investment = this->getData(idx) / 100 * algorithmsData->getMarketingBudget();
+        return (investment * algorithmsData->getChannelROI(idx));
+    }
     // fitness is the total profit
     void setFitness() {
         double totalFitness = 0;
@@ -76,6 +82,23 @@ private:
 
         fitness = totalFitness;
         isFitnessUptoDate = true;
+    }
+
+    bool isFeasible() {
+        double totalPercentages = 0;
+        bool isFeasible = true;
+        for (int i = 0 ; i<chromosomeData.size();++i){
+            totalPercentages += chromosomeData[i];
+            isFeasible &= algorithmsData->isInBounds(i,chromosomeData[i]);
+        }
+        isFeasible &= (totalPercentages <= 100);
+        return isFeasible;
+    }
+
+    void makeChromosomeFeasible() {
+        if(!isFeasible()){
+            // TODO: Think how you can make it feasible
+        }
     }
 
 public:
@@ -89,6 +112,8 @@ public:
         for (int i = 0; i < chromosomeData.size(); ++i) {
             chromosomeData[i] = algorithmsData->generateInvestment(i);
         }
+
+        makeChromosomeFeasible();
     }
 
     double getData(int idx) { return chromosomeData[idx]; }
@@ -119,9 +144,6 @@ public:
         return fitness;
     }
 
-    double getChannelReturn(int idx) {
-        return this->getData(idx) / 100 * algorithmsData->getMarketingBudget();
-    }
 
     void printData(ostream &out) {
         for (int i = 0; i < chromosomeData.size(); ++i) {
@@ -178,7 +200,7 @@ private:
         else loggerStream << stateID << "\n";
 
         loggerStream << "Population:\n";
-        for (auto& curr : population) {
+        for (auto &curr : population) {
             curr.printData(loggerStream);
         }
         loggerStream << "\nBest Chromosome:\n";
@@ -205,8 +227,8 @@ public:
     Chromosome execute(int epochs, ostream *loggerStream = nullptr) {
         if (loggerStream)
             (*loggerStream) << "\nSTART OF THE EXECUTION\n------------------------------------------\n"
-            << "Number of Epochs = " << epochs << "\n"
-            << "Population Size = " << population.size();
+                            << "Number of Epochs = " << epochs << "\n"
+                            << "Population Size = " << population.size();
 
         for (int currState = 1; currState <= epochs; ++currState) {
             if (loggerStream)
