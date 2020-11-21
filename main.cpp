@@ -213,11 +213,12 @@ private:
     void nextGeneration() {
         vector<double> chromosomesFitness = getChromosomesFitness();
 
-        int firstParentIdx = 0, secondParentIdx = data->getNChannels() - 1;
-        /* TODO: implement tournament selection and fill (firstParentIdx and secondParentIdx),
-            * After implementing remove firstParentIdx and secondParentIdx initialization
-		  */
-
+        std::uniform_int_distribution<int> uid(0, data->getNChannels() - 1);
+        auto Tournament = [this](int option1, int option2) {
+            return population[option1].getFitness() > population[option2].getFitness() ? option1 : option2;
+        };
+        int firstParentIdx = Tournament(uid(g_RNG), uid(g_RNG));
+        int secondParentIdx = Tournament(uid(g_RNG), uid(g_RNG));
 
         Chromosome firstParent = population[firstParentIdx], secondParent = population[secondParentIdx];
         pair<Chromosome, Chromosome> offSprings = firstParent.combineWith(secondParent);
