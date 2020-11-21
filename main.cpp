@@ -39,7 +39,7 @@ public:
         uniform_real_distribution<double> dist(lowerBounds[channelIdx], nextafter(upperBounds[channelIdx], DBL_MAX));
         return dist(g_RNG);
     }
-    bool isInBounds(int idx, double val) const{
+    bool isInBounds(int idx, double val) const {
         return (lowerBounds[idx] <= val && upperBounds[idx] >= val);
     }
 
@@ -87,16 +87,16 @@ private:
     bool isFeasible() {
         double totalPercentages = 0;
         bool isFeasible = true;
-        for (int i = 0 ; i<chromosomeData.size();++i){
+        for (int i = 0; i < chromosomeData.size(); ++i) {
             totalPercentages += chromosomeData[i];
-            isFeasible &= algorithmsData->isInBounds(i,chromosomeData[i]);
+            isFeasible &= algorithmsData->isInBounds(i, chromosomeData[i]);
         }
         isFeasible &= (totalPercentages <= 100);
         return isFeasible;
     }
 
     void makeChromosomeFeasible() {
-        if(!isFeasible()){
+        if (!isFeasible()) {
             // TODO: Think how you can make it feasible
         }
     }
@@ -133,7 +133,23 @@ public:
         if (this->chromosomeData == other.chromosomeData) return {*this, other};
 
         Chromosome ret1 = *this, ret2 = other;
-        // TODO: implement 2 points cross-over and fill ret1 and ret2
+
+        int chromosomeSz = (int)chromosomeData.size();
+
+        uniform_int_distribution<int> uid(0, chromosomeSz - 1);
+
+        //With 2 point cross-over at L and R we get three parts: [0, L-1][L, R][R+1, N]
+        //In the off-chance that L and R are the same, the algorithm changes to 1-point cross-over.
+
+        int L = uid(g_RNG), R = uid(g_RNG);
+        if(R == L){
+            for (int i = R+1; i < chromosomeSz; ++i)
+                std::swap(ret1.chromosomeData[i], ret2.chromosomeData[i]);
+        }else{
+            if(R < L) std::swap(L, R);
+            for (int i = L; i <= R; ++i)
+                std::swap(ret1.chromosomeData[i], ret2.chromosomeData[i]);
+        }
 
         return {ret1, ret2};
     }
