@@ -176,7 +176,7 @@ public:
             out << algorithmsData->getChannelName(i) << " -> "
                 << getChannelInvestment(i) << "K (returns " << getChannelReturn(i) << "K)" << "\n";
         }
-        out << "\nThe total profit is " << this->getFitness() << "K\n";
+        out << "The total profit is " << this->getFitness() << "K\n\n";
     }
 
 };
@@ -268,7 +268,7 @@ public:
         if (loggerStream)
             (*loggerStream) << "\nSTART OF THE EXECUTION\n------------------------------------------\n"
                             << "Number of Epochs = " << epochs << "\n"
-                            << "Population Size = " << population.size();
+                            << "Population Size = " << population.size() << "\n";
 
         for (int currState = 1; currState <= epochs; ++currState) {
             if (loggerStream)
@@ -294,7 +294,7 @@ int main() {
 
     string outputFilename = "logger.out";
     auto *outputFile = new ofstream(); // to redirect it to cout -> `auto* outputFile = &cout`
-    outputFile->open(outputFilename, ios::app); // If you want to clear the output every run make it ios::out
+    outputFile->open(outputFilename, ios::out); // If you want to clear the output every run make it ios::out
 
     cout << "Enter the marketing budget (in thousands \"K\"):\n";
     cin >> marketingBudget;
@@ -336,10 +336,16 @@ int main() {
 
     // pass this by reference to other objects
     auto *data = new dataHandler(lowerBounds, upperBounds, channelROIs, channelNames, marketingBudget, nChannels);
-    int populationSize = 20, epochs = 100; // change these parameters for different outputs
+    const int populationSize = 20, epochs = 100, runTimes = 20; // change these parameters for different outputs
 
     GeneticAlgorithm algorithmModel(data, populationSize);
+
     Chromosome result = algorithmModel.execute(epochs, outputFile);
+    for (int i = 1; i < runTimes; ++i) {
+        Chromosome current = algorithmModel.execute(epochs, outputFile);
+        if(current.getFitness() > result.getFitness())
+            result = current;
+    }
 
     cout << "The final marketing budget allocation is:\n";
     result.printData(cout);
