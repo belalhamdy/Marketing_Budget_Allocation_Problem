@@ -42,7 +42,12 @@ public:
     bool isInBounds(int idx, double val) const {
         return (lowerBounds[idx] <= val && upperBounds[idx] >= val);
     }
-
+    //Forces val to be in bounds of the idx-th constraint.
+    double clipToBounds(int idx, double val) {
+        if (val < lowerBounds[idx]) val = lowerBounds[idx];
+        if (val > upperBounds[idx]) val = upperBounds[idx];
+        return val;
+    }
 
 };
 
@@ -97,7 +102,20 @@ private:
 
     void makeChromosomeFeasible() {
         if (!isFeasible()) {
-            // TODO: Think how you can make it feasible
+            double totalPercentages = 0;
+            for (int i = 0; i < chromosomeData.size(); ++i) {
+                chromosomeData[i] = algorithmsData->clipToBounds(i, chromosomeData[i]);
+                totalPercentages += chromosomeData[i];
+            }
+            if (totalPercentages > 100) {
+                for (int i = 0; i < chromosomeData.size(); ++i) {
+                    double newVal = algorithmsData->clipToBounds(i, 0.0);
+                    totalPercentages -= newVal - chromosomeData[i];
+                    chromosomeData[i] = newVal;
+                    if (totalPercentages <= 100)
+                        break;
+                }
+            }
         }
     }
 
@@ -134,7 +152,7 @@ public:
 
         Chromosome ret1 = *this, ret2 = other;
 
-        int chromosomeSz = (int)chromosomeData.size();
+        int chromosomeSz = (int) chromosomeData.size();
 
         uniform_int_distribution<int> uid(0, chromosomeSz - 1);
 
@@ -142,11 +160,11 @@ public:
         //In the off-chance that L and R are the same, the algorithm changes to 1-point cross-over.
 
         int L = uid(g_RNG), R = uid(g_RNG);
-        if(R == L){
-            for (int i = R+1; i < chromosomeSz; ++i)
+        if (R == L) {
+            for (int i = R + 1; i < chromosomeSz; ++i)
                 std::swap(ret1.chromosomeData[i], ret2.chromosomeData[i]);
-        }else{
-            if(R < L) std::swap(L, R);
+        } else {
+            if (R < L) std::swap(L, R);
             for (int i = L; i <= R; ++i)
                 std::swap(ret1.chromosomeData[i], ret2.chromosomeData[i]);
         }
@@ -194,10 +212,11 @@ private:
 
     void nextGeneration() {
         vector<double> chromosomesFitness = getChromosomesFitness();
+
         int firstParentIdx = 0, secondParentIdx = data->getNChannels() - 1;
         /* TODO: implement tournament selection and fill (firstParentIdx and secondParentIdx),
             * After implementing remove firstParentIdx and secondParentIdx initialization
-         */
+		  */
 
 
         Chromosome firstParent = population[firstParentIdx], secondParent = population[secondParentIdx];
