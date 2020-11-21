@@ -2,6 +2,7 @@
 #pragma ide diagnostic ignored "cert-err58-cpp"
 
 #include <iostream>
+#include <iomanip>
 #include <fstream>
 #include <cfloat>
 #include <vector>
@@ -34,8 +35,8 @@ public:
     string getChannelName(int idx) const { return channelNames[idx]; }
 
     /// generates a random investment for a specific channel (0 - base) based on the channel lower and upper bounds
-    double generateInvestment(int channelIdx) const {
-        uniform_real_distribution<double> dist(lowerBounds[channelIdx], upperBounds[channelIdx]);
+    double generateInvestment(int idx) const {
+        uniform_real_distribution<double> dist(lowerBounds[idx], upperBounds[idx]);
         return dist(g_RNG);
     }
     bool isInBounds(int idx, double val) const {
@@ -60,9 +61,11 @@ private:
     double fitness = DBL_MIN;
     bool isFitnessUptoDate = false;
 
-    double getChannelReturn(int idx) {
-        double investment = this->getData(idx) / 100 * algorithmsData->getMarketingBudget();
-        return (investment * algorithmsData->getChannelROI(idx));
+    double getChannelInvestment(int idx) const {
+        return this->getData(idx) / 100 * algorithmsData->getMarketingBudget();;
+    }
+    double getChannelReturn(int idx) const {
+        return (getChannelInvestment(idx) * algorithmsData->getChannelROI(idx) / 100);
     }
     // fitness is the total profit
     void setFitness() {
@@ -74,7 +77,7 @@ private:
         isFitnessUptoDate = true;
     }
 
-    bool isFeasible() {
+    bool isFeasible() const {
         double totalPercentages = 0;
         bool isFeasible = true;
         for (int i = 0; i < chromosomeData.size(); ++i) {
@@ -95,10 +98,12 @@ private:
             if (totalPercentages > 100) {
                 for (int i = 0; i < chromosomeData.size(); ++i) {
                     double newVal = algorithmsData->clipToBounds(i, 0.0);
-                    totalPercentages -= newVal - chromosomeData[i];
+                    totalPercentages -= chromosomeData[i] - newVal;
                     chromosomeData[i] = newVal;
-                    if (totalPercentages <= 100)
+                    if (totalPercentages <= 100) {
+                        chromosomeData[i] += 100 - totalPercentages;
                         break;
+                    }
                 }
             }
             isFitnessUptoDate = false;
@@ -120,7 +125,7 @@ public:
         makeChromosomeFeasible();
     }
 
-    double getData(int idx) { return chromosomeData[idx]; }
+    double getData(int idx) const { return chromosomeData[idx]; }
 
     void mutate(double probability) {
         std::uniform_real_distribution<double> doMutation(0, 1);
@@ -168,7 +173,8 @@ public:
 
     void printData(ostream &out) {
         for (int i = 0; i < chromosomeData.size(); ++i) {
-            out << algorithmsData->getChannelName(i) << " -> " << getChannelReturn(i) << "K\n";
+            out << algorithmsData->getChannelName(i) << " -> "
+                << getChannelInvestment(i) << "K (returns " << getChannelReturn(i) << "K)" << "\n";
         }
         out << "\nThe total profit is " << this->getFitness() << "K\n";
     }
@@ -284,6 +290,7 @@ int main() {
     int nChannels;
     string channelName, tempLB, tempUB;
 
+    cout << setprecision(4);
 
     string outputFilename = "logger.out";
     auto *outputFile = new ofstream(); // to redirect it to cout -> `auto* outputFile = &cout`
