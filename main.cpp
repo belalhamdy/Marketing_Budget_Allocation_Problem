@@ -237,6 +237,7 @@ private:
         replaceOffspring(firstParentIdx, offSprings.first);
         replaceOffspring(secondParentIdx, offSprings.second);
 
+        // elitist replacement by making the best chromosome always in the last
         if(changedBestChromosome){
             population[population.size() - 1] = bestChromosome;
             changedBestChromosome = false;
