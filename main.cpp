@@ -39,9 +39,11 @@ public:
         uniform_real_distribution<double> dist(lowerBounds[idx], upperBounds[idx]);
         return dist(g_RNG);
     }
+
     bool isInBounds(int idx, double val) const {
         return (lowerBounds[idx] <= val && upperBounds[idx] >= val);
     }
+
     //Forces val to be in bounds of the idx-th constraint.
     double clipToBounds(int idx, double val) const {
         if (val < lowerBounds[idx]) val = lowerBounds[idx];
@@ -64,9 +66,11 @@ private:
     double getChannelInvestment(int idx) const {
         return this->getData(idx) / 100 * algorithmsData->getMarketingBudget();;
     }
+
     double getChannelReturn(int idx) const {
         return (getChannelInvestment(idx) * algorithmsData->getChannelROI(idx) / 100);
     }
+
     // fitness is the total profit
     void setFitness() {
         double totalFitness = 0;
@@ -173,7 +177,7 @@ public:
 
     void printData(ostream &out) {
         for (int i = 0; i < chromosomeData.size(); ++i) {
-            out << algorithmsData->getChannelName(i) << " -> "
+            out << setprecision(4) << algorithmsData->getChannelName(i) << " -> "
                 << getChannelInvestment(i) << "K (returns " << getChannelReturn(i) << "K)" << "\n";
         }
         out << "The total profit is " << this->getFitness() << "K\n\n";
@@ -343,7 +347,7 @@ int main() {
     Chromosome result = algorithmModel.execute(epochs, outputFile);
     for (int i = 1; i < runTimes; ++i) {
         Chromosome current = algorithmModel.execute(epochs, outputFile);
-        if(current.getFitness() > result.getFitness())
+        if (current.getFitness() > result.getFitness())
             result = current;
     }
 
@@ -367,6 +371,4 @@ Facebook 11
 20.5 x
 x 18
 10 x
-
 */
-
