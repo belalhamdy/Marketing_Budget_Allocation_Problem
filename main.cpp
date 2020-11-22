@@ -135,7 +135,7 @@ public:
         std::uniform_real_distribution<double> doMutation(0, 1);
         if (doMutation(g_RNG) < probability) return;
 
-        std::uniform_int_distribution<int> mutationIdx(0, chromosomeData.size());
+        std::uniform_int_distribution<int> mutationIdx(0, chromosomeData.size()-1);
         int i = mutationIdx(g_RNG);
 
         chromosomeData[i] = algorithmsData->generateInvestment(i);
@@ -294,8 +294,6 @@ int main() {
     int nChannels;
     string channelName, tempLB, tempUB;
 
-    cout << setprecision(4);
-
     string outputFilename = "logger.out";
     auto *outputFile = new ofstream(); // to redirect it to cout -> `auto* outputFile = &cout`
     outputFile->open(outputFilename, ios::out); // If you want to clear the output every run make it ios::out
@@ -336,7 +334,7 @@ int main() {
         upperBounds[i] = channelUB;
     }
 
-    cout << "Please wait while running the GA…\n\n";
+    cout << "Please wait while running the GA...\n\n";
 
     // pass this by reference to other objects
     auto *data = new dataHandler(lowerBounds, upperBounds, channelROIs, channelNames, marketingBudget, nChannels);
