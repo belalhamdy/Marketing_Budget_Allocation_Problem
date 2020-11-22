@@ -135,7 +135,7 @@ public:
         std::uniform_real_distribution<double> doMutation(0, 1);
         if (doMutation(g_RNG) < probability) return;
 
-        std::uniform_int_distribution<int> mutationIdx(0, chromosomeData.size()-1);
+        std::uniform_int_distribution<int> mutationIdx(0, chromosomeData.size() - 1);
         int i = mutationIdx(g_RNG);
 
         chromosomeData[i] = algorithmsData->generateInvestment(i);
@@ -370,3 +370,12 @@ Facebook 11
 x 18
 10 x
 */
+/*
+ * Best Solution generated:
+The final marketing budget allocation is:
+TV_Advertisement -> 2.7K (returns 0.216K)
+Google -> 87.26K (returns 10.47K)
+Twitter -> 0K (returns 0K)
+Facebook -> 10.04K (returns 1.104K)
+The total profit is 11.79K
+ */
