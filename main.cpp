@@ -192,7 +192,6 @@ private:
     vector<Chromosome> population;
     double mutationProbability;
     bool uniformMutation;
-    bool changedBestChromosome;
 
     /// gets the population fitness
     vector<double> getChromosomesFitness() {
@@ -204,10 +203,16 @@ private:
     }
 
     void replaceOffspring(int oldIdx, Chromosome &newData) {
+        // best chromosome is going to change so you have to keep it
+        if(population[oldIdx].getFitness() - bestChromosome.getFitness() < 1e10){
+            // elitist replacement by making the best chromosome always in the last except if the new data will enter in the last
+            if(oldIdx == population.size() - 1) population[0] = bestChromosome;
+            else population[population.size() - 1] = bestChromosome;
+        }
+
         population[oldIdx] = newData;
 
         if (newData.getFitness() > bestChromosome.getFitness()) {
-            changedBestChromosome = true;
             bestChromosome = newData;
         }
     }
@@ -237,11 +242,6 @@ private:
         replaceOffspring(firstParentIdx, offSprings.first);
         replaceOffspring(secondParentIdx, offSprings.second);
 
-        // elitist replacement by making the best chromosome always in the last
-        if(changedBestChromosome){
-            population[population.size() - 1] = bestChromosome;
-            changedBestChromosome = false;
-        }
 
     }
 
@@ -276,7 +276,6 @@ public:
         this->mutationProbability = mutationProbability;
         this->uniformMutation = uniformMutation;
 
-        changedBestChromosome = false;
     }
 
     Chromosome execute(int epochs, ostream *loggerStream = nullptr) {
@@ -385,8 +384,8 @@ x 18
  * Best Solution generated:
 The final marketing budget allocation is:
 TV_Advertisement -> 2.7000K (returns 0.2160K)
-Google -> 87.1119K (returns 10.4534K)
+Google -> 87.1841K (returns 10.4621K)
 Twitter -> 0.0000K (returns 0.0000K)
-Facebook -> 10.1881K (returns 1.1207K)
-The total profit is 11.7901K
+Facebook -> 10.1159K (returns 1.1127K)
+The total profit is 11.7908K
  */
