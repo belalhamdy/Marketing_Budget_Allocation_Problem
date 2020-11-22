@@ -177,7 +177,7 @@ public:
 
     void printData(ostream &out) {
         for (int i = 0; i < chromosomeData.size(); ++i) {
-            out << setprecision(4) << algorithmsData->getChannelName(i) << " -> "
+            out << fixed <<setprecision(4) << algorithmsData->getChannelName(i) << " -> "
                 << getChannelInvestment(i) << "K (returns " << getChannelReturn(i) << "K)" << "\n";
         }
         out << "The total profit is " << this->getFitness() << "K\n\n";
@@ -192,6 +192,7 @@ private:
     vector<Chromosome> population;
     double mutationProbability;
     bool uniformMutation;
+    bool changedBestChromosome;
 
     /// gets the population fitness
     vector<double> getChromosomesFitness() {
@@ -205,8 +206,10 @@ private:
     void replaceOffspring(int oldIdx, Chromosome &newData) {
         population[oldIdx] = newData;
 
-        if (newData.getFitness() > bestChromosome.getFitness())
+        if (newData.getFitness() > bestChromosome.getFitness()) {
+            changedBestChromosome = true;
             bestChromosome = newData;
+        }
     }
 
     void nextGeneration(int generationIdx) {
@@ -233,6 +236,11 @@ private:
 
         replaceOffspring(firstParentIdx, offSprings.first);
         replaceOffspring(secondParentIdx, offSprings.second);
+
+        if(changedBestChromosome){
+            population[population.size() - 1] = bestChromosome;
+            changedBestChromosome = false;
+        }
 
     }
 
@@ -266,6 +274,8 @@ public:
         }
         this->mutationProbability = mutationProbability;
         this->uniformMutation = uniformMutation;
+
+        changedBestChromosome = false;
     }
 
     Chromosome execute(int epochs, ostream *loggerStream = nullptr) {
@@ -373,9 +383,9 @@ x 18
 /*
  * Best Solution generated:
 The final marketing budget allocation is:
-TV_Advertisement -> 2.7K (returns 0.216K)
-Google -> 87.26K (returns 10.47K)
-Twitter -> 0K (returns 0K)
-Facebook -> 10.04K (returns 1.104K)
-The total profit is 11.79K
+TV_Advertisement -> 2.7000K (returns 0.2160K)
+Google -> 87.1119K (returns 10.4534K)
+Twitter -> 0.0000K (returns 0.0000K)
+Facebook -> 10.1881K (returns 1.1207K)
+The total profit is 11.7901K
  */
