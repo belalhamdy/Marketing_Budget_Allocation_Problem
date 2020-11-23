@@ -64,7 +64,7 @@ private:
     bool isFitnessUptoDate = false;
 
     double getChannelInvestment(int idx) const {
-        return this->getData(idx) / 100 * algorithmsData->getMarketingBudget();;
+        return this->getData(idx) / 100 * algorithmsData->getMarketingBudget();
     }
 
     double getChannelReturn(int idx) const {
